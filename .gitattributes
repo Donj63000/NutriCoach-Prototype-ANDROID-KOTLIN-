@@ -1,0 +1,20 @@
+# Je normalise les fichiers texte pour éviter les différences entre Windows et Linux.
+* text=auto
+
+# Je conserve les scripts et sources avec des fins de ligne compatibles.
+gradlew text eol=lf
+*.sh text eol=lf
+*.bat text eol=crlf
+*.kt text eol=lf
+*.kts text eol=lf
+*.xml text eol=lf
+*.toml text eol=lf
+*.properties text eol=lf
+*.pro text eol=lf
+
+# Je marque explicitement les ressources binaires.
+*.jar binary
+*.png binary
+*.webp binary
+*.jpg binary
+*.jpeg binary

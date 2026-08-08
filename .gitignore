@@ -1,0 +1,50 @@
+# Je garde hors du dépôt les caches et sorties de compilation Gradle.
+.gradle/
+.kotlin/
+**/build/
+
+# Je conserve le wrapper Gradle nécessaire aux builds reproductibles.
+!gradle/wrapper/gradle-wrapper.jar
+
+# Je n'enregistre pas la configuration locale du SDK Android.
+local.properties
+
+# Je garde hors du dépôt les fichiers propres aux IDE.
+.idea/
+*.iml
+
+# Je n'enregistre pas les sorties générées par Android et les outils natifs.
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Je protège les secrets, environnements et fichiers de signature.
+.env
+.env.*
+!.env.example
+*.jks
+*.keystore
+keystore.properties
+signing.properties
+google-services.json
+**/google-services.json
+*.pem
+*.key
+
+# Je conserve localement les instructions et configurations des assistants IA.
+AGENTS.md
+PLAN.md
+CLAUDE.md
+GEMINI.md
+.codex/
+.claude/
+.cursor/
+.gemini/
+.continue/
+.aider*
+.github/copilot-instructions.md
+
+# Je garde hors du dépôt les fichiers générés par le système d'exploitation.
+.DS_Store
+Thumbs.db
+Desktop.ini
