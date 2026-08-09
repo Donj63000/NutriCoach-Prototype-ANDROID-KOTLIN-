@@ -1,54 +1,82 @@
-# NutriCoach
+# NutriGain
 
-## Qu'est-ce que c'est ?
+NutriGain est une application Android privée conçue pour accompagner une
+utilisatrice adulte dans une prise de poids progressive, avec un suivi local,
+simple et non culpabilisant.
 
-NutriCoach est un projet d'application Android en cours de développement.
+## État actuel
 
-L'application est pensée pour une seule utilisatrice adulte qui souhaite prendre du poids progressivement et suivre son alimentation sans complexité.
+Le dépôt contient maintenant la première tranche verticale fonctionnelle :
 
-## À quoi servira l'application ?
+- identité Android définitive `com.val.nutrigain` ;
+- architecture Compose, ViewModel, use cases, repositories, Hilt et Room ;
+- base locale chiffrée avec SQLCipher ;
+- protection de la clé de base avec Android Keystore ;
+- questionnaire initial en trois étapes ;
+- contrôles de cohérence et garde-fous de prudence ;
+- calcul local de l'IMC, de la dépense estimée et du repère énergétique ;
+- désactivation de la cible automatique lorsque la situation demande un avis
+  professionnel ;
+- persistance transactionnelle du profil, du plan et du poids initial ;
+- écran de synthèse ;
+- tests unitaires du moteur métier et du parseur de saisie.
 
-À terme, NutriCoach permettra notamment de :
+Les repas, recettes, graphiques, rappels et rapports hebdomadaires seront
+ajoutés sur cette fondation. Aucun de ces futurs écrans n'est simulé dans la
+version actuelle.
 
-- noter facilement ses repas et les quantités consommées ;
-- suivre ses calories et ses principaux apports nutritionnels ;
-- enregistrer son poids et voir son évolution dans le temps ;
-- définir un objectif personnel de prise de poids progressive ;
-- créer ses propres aliments et recettes ;
-- retrouver ses repas favoris et les recopier rapidement ;
-- scanner le code-barres d'un produit ;
-- recevoir des rappels pour les repas, les collations ou la pesée ;
-- obtenir un bilan simple de sa semaine ;
-- sauvegarder et restaurer ses données.
+## Architecture
 
-La majorité de ces fonctionnalités reste à développer. Le dépôt contient actuellement la première base du projet Android.
+L'application suit un flux unidirectionnel :
 
-## Une application simple et respectueuse des données
+```text
+Compose → ViewModel → Use case → Repository → Room chiffré
+                                      ↓
+                                Flow vers l'UI
+```
 
-NutriCoach est conçu pour rester utilisable même sans connexion Internet. Les informations personnelles, les repas et le poids ont vocation à rester enregistrés sur le téléphone.
+Room est la source de vérité locale. Les calculs nutritionnels restent
+déterministes ; une IA ne devra jamais calculer ou modifier seule une cible.
 
-Une intelligence artificielle pourra aider à comprendre un repas écrit avec des mots simples et à présenter un bilan hebdomadaire. Elle ne remplacera jamais les calculs de l'application et ne pourra pas modifier seule un objectif.
+## Lancer le projet
 
-## Important
+Pré-requis :
 
-NutriCoach est un outil de suivi personnel. L'application ne pose aucun diagnostic, ne prescrit aucun traitement et ne remplace pas un médecin ou un professionnel de la nutrition.
+- Android Studio compatible avec AGP 9.2 ;
+- JDK 17 ou plus récent ;
+- SDK Android 36 installé.
 
-Le projet est encore expérimental. Il n'est pas prêt pour une utilisation réelle ou une publication en production.
+Commandes principales :
 
-## Qui développe le projet ?
+```bash
+./gradlew :app:assembleDebug
+./gradlew :app:testDebugUnitTest
+./gradlew :app:lintDebug
+```
 
-Cette application est développée par **Valentin GIDON**. Les éléments originaux créés pour le projet lui appartiennent, sous réserve des droits propres aux composants tiers utilisés.
+Le premier lancement crée une clé SQLCipher aléatoire. La clé est enveloppée
+avec une clé non exportable de l'Android Keystore et son fichier est placé dans
+`noBackupFilesDir`. La sauvegarde automatique Android est désactivée afin
+d'éviter une restauration de base sans la clé correspondante.
 
-Si vous souhaitez échanger ou travailler sur le projet, vous pouvez écrire à [nodig63@gmail.com](mailto:nodig63@gmail.com).
+## Limites importantes
 
-## Licence et informations légales
+NutriGain ne pose aucun diagnostic, ne prescrit aucun traitement et ne
+remplace pas un médecin ou un diététicien. Les valeurs énergétiques affichées
+sont des estimations de départ. Une perte de poids involontaire, une grossesse,
+un antécédent de trouble alimentaire, certains symptômes, maladies ou
+traitements suspendent volontairement le calcul automatique.
+
+## Licence
 
 Copyright © 2026 Valentin GIDON.
 
-Le code original est publié sous la licence **GNU Affero General Public License v3.0 uniquement** (`AGPL-3.0-only`). Une licence commerciale distincte pourra être proposée ultérieurement par le titulaire des droits.
+Le code original est distribué sous
+[GNU Affero General Public License v3.0 uniquement](LICENSE).
 
-- [Licence du projet](LICENSE)
+Consulter également :
+
 - [Droits d'auteur](COPYRIGHT.md)
-- [Composants et licences tierces](THIRD_PARTY_NOTICES.md)
-- [Règles de contribution](CONTRIBUTING.md)
+- [Composants tiers](THIRD_PARTY_NOTICES.md)
 - [Politique de sécurité](SECURITY.md)
+- [Règles de contribution](CONTRIBUTING.md)
