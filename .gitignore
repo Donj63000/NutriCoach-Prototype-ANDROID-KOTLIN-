@@ -31,7 +31,7 @@ google-services.json
 *.pem
 *.key
 
-# Je conserve localement les instructions et configurations des assistants IA.
+# Je garde hors du dépôt les instructions et configurations des assistants IA.
 AGENTS.md
 PLAN.md
 CLAUDE.md
@@ -43,6 +43,9 @@ GEMINI.md
 .continue/
 .aider*
 .github/copilot-instructions.md
+
+# Je conserve localement les patchs de travail déjà appliqués.
+*.patch
 
 # Je garde hors du dépôt les fichiers générés par le système d'exploitation.
 .DS_Store

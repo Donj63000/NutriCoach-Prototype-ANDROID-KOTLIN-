@@ -1,3 +1,88 @@
 <resources>
-    <string name="app_name">Fitness</string>
+    <string name="app_name">NutriGain</string>
+
+    <string name="loading">Chargement…</string>
+    <string name="unexpected_error">Une erreur inattendue est survenue. Vérifie l’espace disponible puis réessaie.</string>
+    <string name="local_data_error">Les données locales ne peuvent pas être ouvertes de façon sûre. N’efface pas les données de l’application avant d’avoir vérifié la sauvegarde disponible.</string>
+
+    <string name="onboarding_title">Configurer ton accompagnement</string>
+    <string name="onboarding_progress">Étape %1$d sur %2$d</string>
+    <string name="onboarding_previous">Retour</string>
+    <string name="onboarding_next">Continuer</string>
+    <string name="onboarding_finish">Créer mon plan</string>
+    <string name="onboarding_saving">Enregistrement…</string>
+
+    <string name="profile_step_title">Tes repères de départ</string>
+    <string name="profile_step_description">Ces informations servent uniquement à produire des estimations locales et à suivre l’évolution.</string>
+    <string name="birth_date_label">Date de naissance</string>
+    <string name="birth_date_placeholder">JJ/MM/AAAA</string>
+    <string name="height_label">Taille</string>
+    <string name="height_suffix">cm</string>
+    <string name="current_weight_label">Poids actuel</string>
+    <string name="target_weight_label">Poids visé</string>
+    <string name="weight_suffix">kg</string>
+    <string name="metabolic_parameter_title">Paramètre de l’équation métabolique</string>
+    <string name="metabolic_parameter_description">Les équations disponibles utilisent encore une constante « femme » ou « homme ». Ce choix sert uniquement au calcul énergétique.</string>
+    <string name="metabolic_parameter_female">Femme</string>
+    <string name="metabolic_parameter_male">Homme</string>
+
+    <string name="lifestyle_step_title">Ton rythme quotidien</string>
+    <string name="lifestyle_step_description">Choisis le niveau qui représente le mieux une semaine habituelle, pas une journée exceptionnelle.</string>
+    <string name="activity_level_title">Niveau d’activité</string>
+    <string name="activity_sedentary">Peu active</string>
+    <string name="activity_sedentary_description">Travail surtout assis et peu d’activité planifiée.</string>
+    <string name="activity_light">Légèrement active</string>
+    <string name="activity_light_description">Marche régulière ou 1 à 3 séances légères par semaine.</string>
+    <string name="activity_moderate">Modérément active</string>
+    <string name="activity_moderate_description">Activité quotidienne soutenue ou 3 à 5 séances par semaine.</string>
+    <string name="activity_high">Très active</string>
+    <string name="activity_high_description">Travail physique ou entraînement intense fréquent.</string>
+    <string name="gain_pace_title">Rythme de prise de poids</string>
+    <string name="gain_pace_gentle">Doux</string>
+    <string name="gain_pace_gentle_description">Petit surplus initial, plus facile à tenir.</string>
+    <string name="gain_pace_progressive">Progressif</string>
+    <string name="gain_pace_progressive_description">Surplus modéré recommandé pour commencer.</string>
+    <string name="gain_pace_sustained">Soutenu</string>
+    <string name="gain_pace_sustained_description">Surplus plus élevé, à réévaluer avec les mesures.</string>
+
+    <string name="safety_step_title">Quelques vérifications importantes</string>
+    <string name="safety_step_description">Une réponse positive ne pose aucun diagnostic. Elle permet seulement d’éviter un objectif automatique lorsque l’avis d’un professionnel est préférable.</string>
+    <string name="safety_unintentional_loss">La perte de poids récente n’était pas volontaire</string>
+    <string name="safety_pregnancy">Grossesse ou allaitement en cours</string>
+    <string name="safety_eating_disorder">Antécédent ou suspicion de trouble du comportement alimentaire</string>
+    <string name="safety_digestive">Symptômes digestifs importants ou persistants</string>
+    <string name="safety_medical_condition">Maladie pouvant influencer le poids ou l’alimentation</string>
+    <string name="safety_medication">Traitement pouvant influencer l’appétit, la glycémie ou le poids</string>
+    <string name="safety_acknowledgement">Je comprends que NutriGain ne remplace pas un médecin ou un diététicien.</string>
+    <string name="safety_notice_title">Important</string>
+    <string name="safety_notice_body">En cas de perte de poids involontaire, de symptômes persistants ou de difficulté importante avec l’alimentation, demande un avis médical avant de suivre un objectif calorique.</string>
+
+    <string name="error_required">Champ obligatoire.</string>
+    <string name="error_birth_date_invalid">Saisis une date valide au format JJ/MM/AAAA.</string>
+    <string name="error_adult_only">L’application est actuellement réservée aux adultes.</string>
+    <string name="error_age_out_of_range">Vérifie la date de naissance saisie.</string>
+    <string name="error_height_invalid">Saisis une taille comprise entre 120 et 230 cm.</string>
+    <string name="error_weight_invalid">Saisis un poids compris entre 25 et 350 kg.</string>
+    <string name="error_target_not_higher">Le poids visé doit être supérieur au poids actuel.</string>
+    <string name="error_acknowledgement_required">Cette confirmation est nécessaire pour continuer.</string>
+
+    <string name="dashboard_title">Mon plan de prise de poids</string>
+    <string name="dashboard_current_weight">Poids actuel</string>
+    <string name="dashboard_target_weight">Objectif</string>
+    <string name="dashboard_bmi">IMC indicatif</string>
+    <string name="dashboard_daily_target">Repère énergétique quotidien</string>
+    <string name="dashboard_maintenance">Maintien estimé</string>
+    <string name="dashboard_surplus">Surplus initial</string>
+    <string name="dashboard_calories_value">%1$d kcal</string>
+    <string name="dashboard_weight_value">%1$s kg</string>
+    <string name="dashboard_bmi_value">%1$s</string>
+    <string name="dashboard_plan_estimate_notice">Ces valeurs sont des estimations de départ. Elles devront être confrontées à la tendance réelle du poids et ne doivent pas être ajustées sur une seule mesure.</string>
+    <string name="dashboard_no_automatic_target_title">Objectif automatique suspendu</string>
+    <string name="dashboard_no_automatic_target_body">Les réponses indiquent qu’un avis professionnel est préférable avant de fixer une cible calorique. Le suivi du poids et des repas pourra rester utilisable.</string>
+    <string name="dashboard_caution_title">Prudence recommandée</string>
+    <string name="dashboard_caution_body">Le plan est présenté comme une estimation, mais un avis professionnel est conseillé pour vérifier qu’il convient à la situation.</string>
+    <string name="dashboard_normal_title">Plan initial prêt</string>
+    <string name="dashboard_normal_body">Le repère de départ est prêt. Les futurs ajustements devront s’appuyer sur plusieurs mesures prises dans des conditions comparables.</string>
+    <string name="dashboard_bmi_limit">L’IMC est un indicateur statistique imparfait : il ne décrit ni la composition corporelle ni, à lui seul, l’état nutritionnel.</string>
+    <string name="not_available">Non disponible</string>
 </resources>
