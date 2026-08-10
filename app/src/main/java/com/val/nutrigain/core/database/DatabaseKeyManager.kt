@@ -71,8 +71,18 @@ class DatabaseKeyManager @Inject constructor(
             val passphrase = ByteArray(PASSPHRASE_SIZE_BYTES).also {
                 SecureRandom().nextBytes(it)
             }
-            persistEncryptedPassphrase(passphrase)
-            passphrase
+            try {
+                persistEncryptedPassphrase(passphrase)
+                passphrase
+            } catch (exception: Throwable) {
+                /*
+                 * La clé générée n'est rendue à aucun appelant lorsque son
+                 * enveloppe persistante échoue. On efface donc immédiatement
+                 * le tableau mutable avant de propager l'erreur.
+                 */
+                passphrase.fill(0)
+                throw exception
+            }
         } catch (exception: DatabaseKeyException) {
             throw exception
         } catch (exception: GeneralSecurityException) {

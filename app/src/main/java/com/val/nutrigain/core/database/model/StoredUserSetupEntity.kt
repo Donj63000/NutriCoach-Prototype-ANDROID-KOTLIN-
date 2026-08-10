@@ -4,6 +4,7 @@
 package com.`val`.nutrigain.core.database.model
 
 import androidx.room.Embedded
+import com.`val`.nutrigain.core.database.entity.AiDataAccessPolicyEntity
 import com.`val`.nutrigain.core.database.entity.GoalEntity
 import com.`val`.nutrigain.core.database.entity.SafetyProfileEntity
 import com.`val`.nutrigain.core.database.entity.UserProfileEntity
@@ -14,7 +15,7 @@ import com.`val`.nutrigain.core.database.entity.WeightEntryEntity
  *
  * Les objets imbriqués sont nuls lorsque leur ligne n'existe pas. Une seule
  * requête évite les états transitoires observables entre plusieurs Flow Room
- * après l'enregistrement transactionnel du questionnaire.
+ * après une transaction.
  */
 data class StoredUserSetupEntity(
     @Embedded(prefix = "profile_")
@@ -24,5 +25,7 @@ data class StoredUserSetupEntity(
     @Embedded(prefix = "goal_")
     val goal: GoalEntity?,
     @Embedded(prefix = "weight_")
-    val latestWeight: WeightEntryEntity?
+    val latestWeight: WeightEntryEntity?,
+    @Embedded(prefix = "ai_policy_")
+    val aiDataAccessPolicy: AiDataAccessPolicyEntity?
 )

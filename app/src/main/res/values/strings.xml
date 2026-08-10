@@ -46,16 +46,34 @@
     <string name="gain_pace_sustained_description">Surplus plus élevé, à réévaluer avec les mesures.</string>
 
     <string name="safety_step_title">Quelques vérifications importantes</string>
-    <string name="safety_step_description">Une réponse positive ne pose aucun diagnostic. Elle permet seulement d’éviter un objectif automatique lorsque l’avis d’un professionnel est préférable.</string>
-    <string name="safety_unintentional_loss">La perte de poids récente n’était pas volontaire</string>
-    <string name="safety_pregnancy">Grossesse ou allaitement en cours</string>
-    <string name="safety_eating_disorder">Antécédent ou suspicion de trouble du comportement alimentaire</string>
-    <string name="safety_digestive">Symptômes digestifs importants ou persistants</string>
-    <string name="safety_medical_condition">Maladie pouvant influencer le poids ou l’alimentation</string>
-    <string name="safety_medication">Traitement pouvant influencer l’appétit, la glycémie ou le poids</string>
-    <string name="safety_acknowledgement">Je comprends que NutriGain ne remplace pas un médecin ou un diététicien.</string>
+    <string name="safety_step_description">Réponds à chaque question. « Incertain » est une réponse valable et suspend le repère automatique lorsqu’un avis professionnel est préférable.</string>
+    <string name="safety_unintentional_loss">As-tu récemment perdu du poids sans l’avoir voulu ?</string>
+    <string name="safety_reduced_appetite">As-tu une baisse d’appétit importante ou persistante ?</string>
+    <string name="safety_swallowing_or_vomiting">As-tu des difficultés à avaler ou des vomissements persistants ?</string>
+    <string name="safety_pregnancy">Es-tu enceinte ou en période d’allaitement ?</string>
+    <string name="safety_eating_disorder">As-tu un antécédent ou une suspicion de trouble du comportement alimentaire ?</string>
+    <string name="safety_digestive">As-tu des symptômes digestifs importants ou persistants ?</string>
+    <string name="safety_medical_condition">As-tu une maladie pouvant influencer le poids ou l’alimentation ?</string>
+    <string name="safety_medication">Prends-tu un traitement pouvant influencer l’appétit, la glycémie ou le poids ?</string>
+    <string name="safety_food_allergies">As-tu des allergies ou intolérances alimentaires à prendre en compte ?</string>
+    <string name="health_answer_yes">Oui</string>
+    <string name="health_answer_no">Non</string>
+    <string name="health_answer_unsure">Incertain</string>
+    <string name="medical_context_note_label">Contexte utile (facultatif)</string>
+    <string name="medical_context_note_placeholder">Ex. restriction ou recommandation déjà donnée par un professionnel. N’inscris pas de coordonnées ni de document médical.</string>
+    <string name="medical_context_note_privacy">Cette note reste locale et n’est jamais incluse dans le contexte destiné à la future IA.</string>
+    <string name="medical_context_note_counter">%1$d / %2$d caractères</string>
+    <string name="safety_acknowledgement">Je comprends que NutriGain fournit des estimations et ne remplace pas un médecin ou un diététicien.</string>
     <string name="safety_notice_title">Important</string>
-    <string name="safety_notice_body">En cas de perte de poids involontaire, de symptômes persistants ou de difficulté importante avec l’alimentation, demande un avis médical avant de suivre un objectif calorique.</string>
+    <string name="safety_notice_body">Ces questions servent uniquement à appliquer des règles de prudence. Elles ne posent aucun diagnostic. Une réponse positive ou incertaine peut suspendre la cible calorique automatique.</string>
+    <string name="safety_notice_emergency">En cas de symptôme sévère, d’impossibilité d’avaler ou de boire, ou d’aggravation rapide, contacte sans attendre les services de santé adaptés à ta situation.</string>
+
+    <string name="privacy_step_title">Données et limites</string>
+    <string name="privacy_step_description">Vérifie comment les informations seront conservées avant de créer le plan.</string>
+    <string name="privacy_local_title">Stockage local protégé</string>
+    <string name="privacy_local_body">Le profil, le questionnaire et le plan sont enregistrés dans une base locale chiffrée. Les sauvegardes Android de l’application sont désactivées pour éviter une copie non maîtrisée de ces données sensibles.</string>
+    <string name="privacy_ai_title">Aucun accès IA activé</string>
+    <string name="privacy_ai_body">La future IA n’a actuellement accès à aucune donnée. Son activation exigera un consentement distinct, versionné, limité à des catégories précises et révocable. La note médicale libre et la date de naissance exacte en resteront exclues.</string>
 
     <string name="error_required">Champ obligatoire.</string>
     <string name="error_birth_date_invalid">Saisis une date valide au format JJ/MM/AAAA.</string>
@@ -64,12 +82,24 @@
     <string name="error_height_invalid">Saisis une taille comprise entre 120 et 230 cm.</string>
     <string name="error_weight_invalid">Saisis un poids compris entre 25 et 350 kg.</string>
     <string name="error_target_not_higher">Le poids visé doit être supérieur au poids actuel.</string>
+    <string name="error_selection_required">Choisis une option pour continuer.</string>
+    <string name="error_questionnaire_incomplete">Réponds à toutes les questions, y compris avec « Incertain » lorsque tu ne sais pas.</string>
+    <string name="error_medical_note_too_long">La note dépasse la longueur autorisée.</string>
     <string name="error_acknowledgement_required">Cette confirmation est nécessaire pour continuer.</string>
+
+    <string name="review_back">Retour</string>
+    <string name="health_review_title">Réviser le questionnaire</string>
+    <string name="health_review_description">Mets ces réponses à jour dès que ta situation, tes symptômes ou tes traitements changent. Le repère énergétique sera recalculé ou suspendu dans la même opération.</string>
+    <string name="health_review_previous_title">Dernière évaluation enregistrée</string>
+    <string name="health_review_previous_date">Réponses du %1$s</string>
+    <string name="health_review_due_date">Révision prévue le %1$s</string>
+    <string name="health_review_save">Enregistrer la révision</string>
+    <string name="health_review_saving">Enregistrement…</string>
 
     <string name="dashboard_title">Mon plan de prise de poids</string>
     <string name="dashboard_current_weight">Poids actuel</string>
     <string name="dashboard_target_weight">Objectif</string>
-    <string name="dashboard_bmi">IMC indicatif</string>
+    <string name="dashboard_bmi">IMC indicatif actuel</string>
     <string name="dashboard_daily_target">Repère énergétique quotidien</string>
     <string name="dashboard_maintenance">Maintien estimé</string>
     <string name="dashboard_surplus">Surplus initial</string>
@@ -78,11 +108,39 @@
     <string name="dashboard_bmi_value">%1$s</string>
     <string name="dashboard_plan_estimate_notice">Ces valeurs sont des estimations de départ. Elles devront être confrontées à la tendance réelle du poids et ne doivent pas être ajustées sur une seule mesure.</string>
     <string name="dashboard_no_automatic_target_title">Objectif automatique suspendu</string>
-    <string name="dashboard_no_automatic_target_body">Les réponses indiquent qu’un avis professionnel est préférable avant de fixer une cible calorique. Le suivi du poids et des repas pourra rester utilisable.</string>
+    <string name="dashboard_no_automatic_target_body">Les réponses indiquent qu’un avis professionnel est préférable avant de fixer une cible calorique. Le suivi du poids pourra rester utilisable.</string>
     <string name="dashboard_caution_title">Prudence recommandée</string>
     <string name="dashboard_caution_body">Le plan est présenté comme une estimation, mais un avis professionnel est conseillé pour vérifier qu’il convient à la situation.</string>
     <string name="dashboard_normal_title">Plan initial prêt</string>
     <string name="dashboard_normal_body">Le repère de départ est prêt. Les futurs ajustements devront s’appuyer sur plusieurs mesures prises dans des conditions comparables.</string>
+    <string name="dashboard_review_due_title">Questionnaire à réviser</string>
+    <string name="dashboard_review_due_body">Le questionnaire médical est arrivé à échéance. Révise-le avant toute future utilisation personnalisée des données.</string>
+    <string name="dashboard_next_review">Révision prévue : %1$s</string>
+    <string name="dashboard_review_questionnaire">Réviser mes réponses</string>
     <string name="dashboard_bmi_limit">L’IMC est un indicateur statistique imparfait : il ne décrit ni la composition corporelle ni, à lui seul, l’état nutritionnel.</string>
+    <string name="dashboard_calculation_provenance">Calcul du %1$s fondé sur un poids de %2$s kg.</string>
+    <string name="dashboard_timeline_title">Calendrier indicatif</string>
+    <string name="dashboard_target_date">Date théorique : %1$s</string>
+    <string name="dashboard_target_date_unavailable">Aucune date théorique affichée : la situation doit être réévaluée ou l’horizon est trop incertain.</string>
+    <string name="dashboard_last_weight_date">Dernière mesure enregistrée : %1$s</string>
+
+    <string name="dashboard_ai_disabled_title">Accès de la future IA désactivé</string>
+    <string name="dashboard_ai_disabled_body">Aucune donnée n’est autorisée pour un traitement par IA. Le questionnaire médical ne vaut jamais consentement à cet usage.</string>
+    <string name="dashboard_ai_enabled_title">Autorisation IA enregistrée</string>
+    <string name="dashboard_ai_enabled_body">%1$d catégories de données sont autorisées par la politique locale. Le connecteur distant n’est pas implémenté dans cette version.</string>
+    <string name="ai_scope_profile">profil minimisé</string>
+    <string name="ai_scope_goal">objectif</string>
+    <string name="ai_scope_latest_weight">dernier poids</string>
+    <string name="ai_scope_safety">résumé de prudence</string>
+
+    <string name="dashboard_data_title">Mes données locales</string>
+    <string name="dashboard_data_body">Tu peux supprimer en une seule opération le profil, le questionnaire, le plan, les poids et toute politique d’accès IA.</string>
+    <string name="dashboard_delete_data">Supprimer toutes mes données</string>
+    <string name="delete_data_dialog_title">Supprimer définitivement les données ?</string>
+    <string name="delete_data_dialog_body">Cette action efface toutes les lignes utilisateur de la base locale et ne peut pas être annulée. L’application reviendra ensuite à la configuration initiale.</string>
+    <string name="delete_data_confirm">Supprimer</string>
+    <string name="delete_data_cancel">Annuler</string>
+    <string name="delete_data_error">La suppression n’a pas pu être finalisée. Aucune remise à zéro partielle n’a été validée.</string>
+
     <string name="not_available">Non disponible</string>
 </resources>

@@ -5,14 +5,16 @@ package com.`val`.nutrigain.core.domain
 
 import com.`val`.nutrigain.core.model.ActivityLevel
 import com.`val`.nutrigain.core.model.GainPace
+import com.`val`.nutrigain.core.model.HealthAnswer
+import com.`val`.nutrigain.core.model.HealthQuestionnaireAnswers
 import com.`val`.nutrigain.core.model.MetabolicSex
-import com.`val`.nutrigain.core.model.SafetyAnswers
 import com.`val`.nutrigain.core.model.SafetyLevel
 import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -37,8 +39,13 @@ class CreateInitialPlanUseCaseTest {
     )
 
     @Test
-    fun `cree un plan coherent pour un profil sans signal`() {
-        val result = useCase(validRequest())
+    fun `cree un plan coherent et tracable pour un profil sans signal`() {
+        val result = useCase(
+            validRequest().copy(
+                medicalContextNote =
+                    "  Recommandation\t déjà\nconnue.  "
+            )
+        )
 
         assertTrue(result is CreateInitialPlanResult.Success)
         val setup = (result as CreateInitialPlanResult.Success)
@@ -48,6 +55,18 @@ class CreateInitialPlanUseCaseTest {
             SafetyLevel.NORMAL,
             setup.safetyProfile.level
         )
+        assertEquals(
+            "Recommandation déjà connue.",
+            setup.safetyProfile.medicalContextNote
+        )
+        assertEquals(
+            HealthQuestionnairePolicy.QUESTIONNAIRE_VERSION,
+            setup.safetyProfile.questionnaireVersion
+        )
+        assertEquals(
+            LocalDate.parse("2027-02-09"),
+            setup.safetyProfile.reviewDueAt
+        )
         assertEquals(1_747, setup.goal.estimatedMaintenanceCalories)
         assertEquals(2_050, setup.goal.dailyCalorieTarget)
         assertEquals(300, setup.goal.initialSurplusCalories)
@@ -56,18 +75,32 @@ class CreateInitialPlanUseCaseTest {
             setup.goal.targetGainKgPerWeek,
             0.001
         )
-        assertEquals("gain-plan-1.0.0", setup.goal.calculationVersion)
+        assertEquals(
+            "gain-plan-2.0.0",
+            setup.goal.calculationVersion
+        )
         assertEquals(
             LocalDate.parse("2026-08-09"),
             setup.goal.startDate
         )
+        assertEquals(
+            LocalDate.parse("2026-08-09"),
+            setup.goal.calculationDate
+        )
+        assertEquals(
+            55.0,
+            setup.goal.calculationWeightKg,
+            0.001
+        )
+        assertFalse(setup.aiDataAccessPolicy.enabled)
+        assertTrue(setup.aiDataAccessPolicy.scopes.isEmpty())
     }
 
     @Test
     fun `ne calcule pas de cible lorsqu une revue est requise`() {
         val request = validRequest().copy(
-            safetyAnswers = safeAnswers().copy(
-                unintentionalWeightLoss = true
+            healthAnswers = safeAnswers().copy(
+                unintentionalWeightLoss = HealthAnswer.YES
             )
         )
 
@@ -82,8 +115,8 @@ class CreateInitialPlanUseCaseTest {
         assertNull(setup.goal.estimatedMaintenanceCalories)
         assertNull(setup.goal.dailyCalorieTarget)
         assertNull(setup.goal.initialSurplusCalories)
+        assertNull(setup.goal.indicativeTargetDate)
     }
-
 
     @Test
     fun `suspend la cible automatique lorsque le poids vise un imc de trente`() {
@@ -115,6 +148,25 @@ class CreateInitialPlanUseCaseTest {
         )
     }
 
+    @Test
+    fun `refuse une note medicale normalisee trop longue`() {
+        val result = useCase(
+            validRequest().copy(
+                medicalContextNote = "x".repeat(
+                    HealthQuestionnairePolicy
+                        .MAX_MEDICAL_NOTE_LENGTH + 1
+                )
+            )
+        )
+
+        assertTrue(result is CreateInitialPlanResult.Invalid)
+        assertEquals(
+            PlanValidationCode.MEDICAL_NOTE_TOO_LONG,
+            (result as CreateInitialPlanResult.Invalid)
+                .issues[PlanField.MEDICAL_CONTEXT_NOTE]
+        )
+    }
+
     private fun validRequest() = InitialPlanRequest(
         birthDate = LocalDate.parse("1996-03-01"),
         heightCm = 165.0,
@@ -123,16 +175,21 @@ class CreateInitialPlanUseCaseTest {
         metabolicSex = MetabolicSex.FEMALE,
         activityLevel = ActivityLevel.LIGHT,
         pace = GainPace.PROGRESSIVE,
-        safetyAnswers = safeAnswers(),
+        healthAnswers = safeAnswers(),
+        medicalContextNote = null,
         safetyAcknowledged = true
     )
 
-    private fun safeAnswers() = SafetyAnswers(
-        unintentionalWeightLoss = false,
-        pregnantOrBreastfeeding = false,
-        eatingDisorderHistory = false,
-        significantDigestiveSymptoms = false,
-        relevantMedicalCondition = false,
-        relevantMedication = false
+    private fun safeAnswers() = HealthQuestionnaireAnswers(
+        unintentionalWeightLoss = HealthAnswer.NO,
+        reducedAppetite = HealthAnswer.NO,
+        swallowingDifficultyOrPersistentVomiting =
+            HealthAnswer.NO,
+        pregnantOrBreastfeeding = HealthAnswer.NO,
+        eatingDisorderHistory = HealthAnswer.NO,
+        significantDigestiveSymptoms = HealthAnswer.NO,
+        relevantMedicalCondition = HealthAnswer.NO,
+        relevantMedication = HealthAnswer.NO,
+        foodAllergiesOrIntolerances = HealthAnswer.NO
     )
 }

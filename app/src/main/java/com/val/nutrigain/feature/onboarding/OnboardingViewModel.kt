@@ -8,13 +8,16 @@ import androidx.lifecycle.viewModelScope
 import com.`val`.nutrigain.core.data.UserSetupRepository
 import com.`val`.nutrigain.core.domain.CreateInitialPlanResult
 import com.`val`.nutrigain.core.domain.CreateInitialPlanUseCase
+import com.`val`.nutrigain.core.domain.HealthQuestionnairePolicy
 import com.`val`.nutrigain.core.domain.InitialPlanRequest
 import com.`val`.nutrigain.core.domain.PlanField
 import com.`val`.nutrigain.core.domain.PlanValidationCode
 import com.`val`.nutrigain.core.model.ActivityLevel
 import com.`val`.nutrigain.core.model.GainPace
+import com.`val`.nutrigain.core.model.HealthAnswer
+import com.`val`.nutrigain.core.model.HealthQuestion
+import com.`val`.nutrigain.core.model.HealthQuestionnaireAnswers
 import com.`val`.nutrigain.core.model.MetabolicSex
-import com.`val`.nutrigain.core.model.SafetyAnswers
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
@@ -27,7 +30,8 @@ import kotlinx.coroutines.launch
 enum class OnboardingStep {
     PROFILE,
     LIFESTYLE,
-    SAFETY
+    HEALTH,
+    PRIVACY
 }
 
 data class OnboardingUiState(
@@ -36,15 +40,17 @@ data class OnboardingUiState(
     val heightCm: String = "",
     val currentWeightKg: String = "",
     val targetWeightKg: String = "",
-    val metabolicSex: MetabolicSex = MetabolicSex.FEMALE,
-    val activityLevel: ActivityLevel = ActivityLevel.LIGHT,
-    val pace: GainPace = GainPace.PROGRESSIVE,
-    val unintentionalWeightLoss: Boolean = false,
-    val pregnantOrBreastfeeding: Boolean = false,
-    val eatingDisorderHistory: Boolean = false,
-    val significantDigestiveSymptoms: Boolean = false,
-    val relevantMedicalCondition: Boolean = false,
-    val relevantMedication: Boolean = false,
+    /*
+     * Les choix restent nuls jusqu'à une action explicite. Une valeur par
+     * défaut silencieuse serait enregistrée comme si l'utilisateur l'avait
+     * réellement choisie.
+     */
+    val metabolicSex: MetabolicSex? = null,
+    val activityLevel: ActivityLevel? = null,
+    val pace: GainPace? = null,
+    val healthAnswers:
+        Map<HealthQuestion, HealthAnswer> = emptyMap(),
+    val medicalContextNote: String = "",
     val safetyAcknowledged: Boolean = false,
     val validationIssues:
         Map<PlanField, PlanValidationCode> = emptyMap(),
@@ -95,64 +101,69 @@ class OnboardingViewModel @Inject constructor(
     }
 
     fun selectMetabolicSex(value: MetabolicSex) {
-        mutableUiState.update {
-            it.copy(
+        updateEditable { current ->
+            current.copy(
                 metabolicSex = value,
+                validationIssues = current.validationIssues -
+                    PlanField.METABOLIC_SEX,
                 hasUnexpectedError = false
             )
         }
     }
 
     fun selectActivityLevel(value: ActivityLevel) {
-        mutableUiState.update {
-            it.copy(
+        updateEditable { current ->
+            current.copy(
                 activityLevel = value,
+                validationIssues = current.validationIssues -
+                    PlanField.ACTIVITY_LEVEL,
                 hasUnexpectedError = false
             )
         }
     }
 
     fun selectPace(value: GainPace) {
-        mutableUiState.update {
-            it.copy(
+        updateEditable { current ->
+            current.copy(
                 pace = value,
+                validationIssues = current.validationIssues -
+                    PlanField.GAIN_PACE,
                 hasUnexpectedError = false
             )
         }
     }
 
-    fun setUnintentionalWeightLoss(value: Boolean) =
-        updateSafetyAnswer {
-            copy(unintentionalWeightLoss = value)
+    fun updateHealthAnswer(
+        question: HealthQuestion,
+        answer: HealthAnswer
+    ) {
+        updateEditable { current ->
+            current.copy(
+                healthAnswers =
+                    current.healthAnswers + (question to answer),
+                validationIssues = current.validationIssues -
+                    PlanField.HEALTH_QUESTIONNAIRE,
+                hasUnexpectedError = false
+            )
+        }
+    }
+
+    fun updateMedicalContextNote(value: String) {
+        if (
+            value.length >
+            HealthQuestionnairePolicy.MAX_MEDICAL_NOTE_LENGTH
+        ) {
+            return
         }
 
-    fun setPregnantOrBreastfeeding(value: Boolean) =
-        updateSafetyAnswer {
-            copy(pregnantOrBreastfeeding = value)
-        }
-
-    fun setEatingDisorderHistory(value: Boolean) =
-        updateSafetyAnswer {
-            copy(eatingDisorderHistory = value)
-        }
-
-    fun setSignificantDigestiveSymptoms(value: Boolean) =
-        updateSafetyAnswer {
-            copy(significantDigestiveSymptoms = value)
-        }
-
-    fun setRelevantMedicalCondition(value: Boolean) =
-        updateSafetyAnswer {
-            copy(relevantMedicalCondition = value)
-        }
-
-    fun setRelevantMedication(value: Boolean) =
-        updateSafetyAnswer {
-            copy(relevantMedication = value)
-        }
+        updateTextField(
+            value = value,
+            field = PlanField.MEDICAL_CONTEXT_NOTE
+        ) { copy(medicalContextNote = it) }
+    }
 
     fun setSafetyAcknowledged(value: Boolean) {
-        mutableUiState.update { current ->
+        updateEditable { current ->
             current.copy(
                 safetyAcknowledged = value,
                 validationIssues = current.validationIssues -
@@ -163,11 +174,7 @@ class OnboardingViewModel @Inject constructor(
     }
 
     fun goToPreviousStep() {
-        if (mutableUiState.value.isSaving) {
-            return
-        }
-
-        mutableUiState.update { current ->
+        updateEditable { current ->
             current.copy(
                 step = when (current.step) {
                     OnboardingStep.PROFILE ->
@@ -176,9 +183,13 @@ class OnboardingViewModel @Inject constructor(
                     OnboardingStep.LIFESTYLE ->
                         OnboardingStep.PROFILE
 
-                    OnboardingStep.SAFETY ->
+                    OnboardingStep.HEALTH ->
                         OnboardingStep.LIFESTYLE
+
+                    OnboardingStep.PRIVACY ->
+                        OnboardingStep.HEALTH
                 },
+                validationIssues = emptyMap(),
                 hasUnexpectedError = false
             )
         }
@@ -191,36 +202,10 @@ class OnboardingViewModel @Inject constructor(
         }
 
         when (current.step) {
-            OnboardingStep.PROFILE -> {
-                when (val parsed = parseProfile(current)) {
-                    is ProfileInputParseResult.Invalid ->
-                        mutableUiState.update {
-                            it.copy(
-                                validationIssues = parsed.issues,
-                                hasUnexpectedError = false
-                            )
-                        }
-
-                    is ProfileInputParseResult.Success ->
-                        mutableUiState.update {
-                            it.copy(
-                                step = OnboardingStep.LIFESTYLE,
-                                validationIssues = emptyMap(),
-                                hasUnexpectedError = false
-                            )
-                        }
-                }
-            }
-
-            OnboardingStep.LIFESTYLE ->
-                mutableUiState.update {
-                    it.copy(
-                        step = OnboardingStep.SAFETY,
-                        hasUnexpectedError = false
-                    )
-                }
-
-            OnboardingStep.SAFETY -> submit()
+            OnboardingStep.PROFILE -> moveAfterProfile(current)
+            OnboardingStep.LIFESTYLE -> moveAfterLifestyle(current)
+            OnboardingStep.HEALTH -> moveAfterHealth(current)
+            OnboardingStep.PRIVACY -> submit()
         }
     }
 
@@ -230,31 +215,95 @@ class OnboardingViewModel @Inject constructor(
             return
         }
 
-        val parsedProfile = parseProfile(current)
-        if (parsedProfile is ProfileInputParseResult.Invalid) {
-            mutableUiState.update {
-                it.copy(
-                    step = OnboardingStep.PROFILE,
-                    validationIssues = parsedProfile.issues,
-                    hasUnexpectedError = false
-                )
-            }
+        val profileResult = parseProfile(current)
+        if (profileResult is ProfileInputParseResult.Invalid) {
+            showIssues(
+                step = OnboardingStep.PROFILE,
+                issues = profileResult.issues
+            )
             return
         }
 
-        check(parsedProfile is ProfileInputParseResult.Success)
+        val selectionIssues = validateSelections(current)
+        if (selectionIssues.isNotEmpty()) {
+            showIssues(
+                step = stepFor(selectionIssues.keys),
+                issues = selectionIssues
+            )
+            return
+        }
+
+        val healthAnswers = HealthQuestionnaireAnswers.from(
+            current.healthAnswers
+        )
+        if (healthAnswers == null) {
+            showIssues(
+                step = OnboardingStep.HEALTH,
+                issues = mapOf(
+                    PlanField.HEALTH_QUESTIONNAIRE to
+                        PlanValidationCode.QUESTIONNAIRE_INCOMPLETE
+                )
+            )
+            return
+        }
+
+        if (
+            !HealthQuestionnairePolicy.isMedicalContextNoteValid(
+                current.medicalContextNote
+            )
+        ) {
+            showIssues(
+                step = OnboardingStep.HEALTH,
+                issues = mapOf(
+                    PlanField.MEDICAL_CONTEXT_NOTE to
+                        PlanValidationCode.MEDICAL_NOTE_TOO_LONG
+                )
+            )
+            return
+        }
 
         if (!current.safetyAcknowledged) {
-            mutableUiState.update {
-                it.copy(
-                    step = OnboardingStep.SAFETY,
-                    validationIssues = mapOf(
-                        PlanField.SAFETY_ACKNOWLEDGEMENT to
-                            PlanValidationCode.ACKNOWLEDGEMENT_REQUIRED
-                    ),
-                    hasUnexpectedError = false
+            showIssues(
+                step = OnboardingStep.PRIVACY,
+                issues = mapOf(
+                    PlanField.SAFETY_ACKNOWLEDGEMENT to
+                        PlanValidationCode.ACKNOWLEDGEMENT_REQUIRED
                 )
-            }
+            )
+            return
+        }
+
+        check(profileResult is ProfileInputParseResult.Success)
+        val metabolicSex = current.metabolicSex
+        val activityLevel = current.activityLevel
+        val pace = current.pace
+
+        /*
+         * Ces valeurs ont été validées juste au-dessus. Le garde explicite
+         * évite néanmoins tout crash si l'état évolue ultérieurement.
+         */
+        if (
+            metabolicSex == null ||
+            activityLevel == null ||
+            pace == null
+        ) {
+            val unexpectedSelectionIssues = validateSelections(current)
+                .ifEmpty {
+                    /*
+                     * Ce repli ne devrait jamais être atteint : il protège
+                     * néanmoins l'interface si une future évolution de la
+                     * validation diverge de l'état attendu ici.
+                     */
+                    mapOf(
+                        PlanField.METABOLIC_SEX to
+                            PlanValidationCode.SELECTION_REQUIRED
+                    )
+                }
+
+            showIssues(
+                step = stepFor(unexpectedSelectionIssues.keys),
+                issues = unexpectedSelectionIssues
+            )
             return
         }
 
@@ -270,16 +319,18 @@ class OnboardingViewModel @Inject constructor(
             try {
                 val result = createInitialPlan(
                     InitialPlanRequest(
-                        birthDate = parsedProfile.input.birthDate,
-                        heightCm = parsedProfile.input.heightCm,
+                        birthDate = profileResult.input.birthDate,
+                        heightCm = profileResult.input.heightCm,
                         currentWeightKg =
-                            parsedProfile.input.currentWeightKg,
+                            profileResult.input.currentWeightKg,
                         targetWeightKg =
-                            parsedProfile.input.targetWeightKg,
-                        metabolicSex = current.metabolicSex,
-                        activityLevel = current.activityLevel,
-                        pace = current.pace,
-                        safetyAnswers = current.toSafetyAnswers(),
+                            profileResult.input.targetWeightKg,
+                        metabolicSex = metabolicSex,
+                        activityLevel = activityLevel,
+                        pace = pace,
+                        healthAnswers = healthAnswers,
+                        medicalContextNote =
+                            current.medicalContextNote,
                         safetyAcknowledged =
                             current.safetyAcknowledged
                     )
@@ -287,15 +338,11 @@ class OnboardingViewModel @Inject constructor(
 
                 when (result) {
                     is CreateInitialPlanResult.Invalid ->
-                        mutableUiState.update {
-                            it.copy(
-                                step = stepFor(
-                                    result.issues.keys
-                                ),
-                                validationIssues = result.issues,
-                                isSaving = false
-                            )
-                        }
+                        showIssues(
+                            step = stepFor(result.issues.keys),
+                            issues = result.issues,
+                            stopSaving = true
+                        )
 
                     is CreateInitialPlanResult.Success ->
                         repository.saveInitialSetup(result.setup)
@@ -317,6 +364,94 @@ class OnboardingViewModel @Inject constructor(
         }
     }
 
+    private fun moveAfterProfile(current: OnboardingUiState) {
+        val parsed = parseProfile(current)
+        val issues = linkedMapOf<PlanField, PlanValidationCode>()
+
+        if (parsed is ProfileInputParseResult.Invalid) {
+            issues += parsed.issues
+        }
+        if (current.metabolicSex == null) {
+            issues[PlanField.METABOLIC_SEX] =
+                PlanValidationCode.SELECTION_REQUIRED
+        }
+
+        if (issues.isNotEmpty()) {
+            showIssues(OnboardingStep.PROFILE, issues)
+        } else {
+            moveTo(OnboardingStep.LIFESTYLE)
+        }
+    }
+
+    private fun moveAfterLifestyle(current: OnboardingUiState) {
+        val issues = linkedMapOf<PlanField, PlanValidationCode>()
+        if (current.activityLevel == null) {
+            issues[PlanField.ACTIVITY_LEVEL] =
+                PlanValidationCode.SELECTION_REQUIRED
+        }
+        if (current.pace == null) {
+            issues[PlanField.GAIN_PACE] =
+                PlanValidationCode.SELECTION_REQUIRED
+        }
+
+        if (issues.isNotEmpty()) {
+            showIssues(OnboardingStep.LIFESTYLE, issues)
+        } else {
+            moveTo(OnboardingStep.HEALTH)
+        }
+    }
+
+    private fun moveAfterHealth(current: OnboardingUiState) {
+        val issues = linkedMapOf<PlanField, PlanValidationCode>()
+        if (
+            HealthQuestionnaireAnswers.from(
+                current.healthAnswers
+            ) == null
+        ) {
+            issues[PlanField.HEALTH_QUESTIONNAIRE] =
+                PlanValidationCode.QUESTIONNAIRE_INCOMPLETE
+        }
+        if (
+            !HealthQuestionnairePolicy.isMedicalContextNoteValid(
+                current.medicalContextNote
+            )
+        ) {
+            issues[PlanField.MEDICAL_CONTEXT_NOTE] =
+                PlanValidationCode.MEDICAL_NOTE_TOO_LONG
+        }
+
+        if (issues.isNotEmpty()) {
+            showIssues(OnboardingStep.HEALTH, issues)
+        } else {
+            moveTo(OnboardingStep.PRIVACY)
+        }
+    }
+
+    private fun validateSelections(
+        state: OnboardingUiState
+    ): Map<PlanField, PlanValidationCode> {
+        return buildMap {
+            if (state.metabolicSex == null) {
+                put(
+                    PlanField.METABOLIC_SEX,
+                    PlanValidationCode.SELECTION_REQUIRED
+                )
+            }
+            if (state.activityLevel == null) {
+                put(
+                    PlanField.ACTIVITY_LEVEL,
+                    PlanValidationCode.SELECTION_REQUIRED
+                )
+            }
+            if (state.pace == null) {
+                put(
+                    PlanField.GAIN_PACE,
+                    PlanValidationCode.SELECTION_REQUIRED
+                )
+            }
+        }
+    }
+
     private fun parseProfile(
         state: OnboardingUiState
     ): ProfileInputParseResult {
@@ -333,7 +468,7 @@ class OnboardingViewModel @Inject constructor(
         field: PlanField,
         transform: OnboardingUiState.(String) -> OnboardingUiState
     ) {
-        mutableUiState.update { current ->
+        updateEditable { current ->
             current
                 .transform(value)
                 .copy(
@@ -341,47 +476,6 @@ class OnboardingViewModel @Inject constructor(
                         current.validationIssues - field,
                     hasUnexpectedError = false
                 )
-        }
-    }
-
-    private fun updateSafetyAnswer(
-        transform: OnboardingUiState.() -> OnboardingUiState
-    ) {
-        mutableUiState.update {
-            it.transform().copy(hasUnexpectedError = false)
-        }
-    }
-
-    private fun OnboardingUiState.toSafetyAnswers(): SafetyAnswers {
-        return SafetyAnswers(
-            unintentionalWeightLoss =
-                unintentionalWeightLoss,
-            pregnantOrBreastfeeding =
-                pregnantOrBreastfeeding,
-            eatingDisorderHistory =
-                eatingDisorderHistory,
-            significantDigestiveSymptoms =
-                significantDigestiveSymptoms,
-            relevantMedicalCondition =
-                relevantMedicalCondition,
-            relevantMedication = relevantMedication
-        )
-    }
-
-    private fun stepFor(
-        fields: Set<PlanField>
-    ): OnboardingStep {
-        return if (
-            fields.any {
-                it == PlanField.BIRTH_DATE ||
-                    it == PlanField.HEIGHT ||
-                    it == PlanField.CURRENT_WEIGHT ||
-                    it == PlanField.TARGET_WEIGHT
-            }
-        ) {
-            OnboardingStep.PROFILE
-        } else {
-            OnboardingStep.SAFETY
         }
     }
 
@@ -406,6 +500,70 @@ class OnboardingViewModel @Inject constructor(
             field = field,
             transform = transform
         )
+    }
+
+    private fun moveTo(step: OnboardingStep) {
+        mutableUiState.update {
+            it.copy(
+                step = step,
+                validationIssues = emptyMap(),
+                hasUnexpectedError = false
+            )
+        }
+    }
+
+    private fun showIssues(
+        step: OnboardingStep,
+        issues: Map<PlanField, PlanValidationCode>,
+        stopSaving: Boolean = false
+    ) {
+        mutableUiState.update {
+            it.copy(
+                step = step,
+                validationIssues = issues,
+                isSaving = if (stopSaving) false else it.isSaving,
+                hasUnexpectedError = false
+            )
+        }
+    }
+
+    private fun stepFor(
+        fields: Set<PlanField>
+    ): OnboardingStep {
+        return when {
+            fields.any {
+                it == PlanField.BIRTH_DATE ||
+                    it == PlanField.HEIGHT ||
+                    it == PlanField.CURRENT_WEIGHT ||
+                    it == PlanField.TARGET_WEIGHT ||
+                    it == PlanField.METABOLIC_SEX
+            } -> OnboardingStep.PROFILE
+
+            fields.any {
+                it == PlanField.ACTIVITY_LEVEL ||
+                    it == PlanField.GAIN_PACE
+            } -> OnboardingStep.LIFESTYLE
+
+            fields.any {
+                it == PlanField.HEALTH_QUESTIONNAIRE ||
+                    it == PlanField.MEDICAL_CONTEXT_NOTE
+            } -> OnboardingStep.HEALTH
+
+            else -> OnboardingStep.PRIVACY
+        }
+    }
+
+    private inline fun updateEditable(
+        crossinline transform:
+            (OnboardingUiState) -> OnboardingUiState
+    ) {
+        mutableUiState.update { current ->
+            if (current.isSaving) {
+                current
+            } else {
+                transform(current)
+            }
+        }
     }
 
     private companion object {
