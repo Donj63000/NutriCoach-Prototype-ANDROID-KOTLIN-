@@ -7,6 +7,7 @@ import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.`val`.nutrigain.core.database.entity.AiDataAccessPolicyEntity
 import com.`val`.nutrigain.core.database.entity.GoalEntity
 import com.`val`.nutrigain.core.database.entity.SafetyProfileEntity
 import com.`val`.nutrigain.core.database.entity.UserProfileEntity
@@ -54,6 +55,7 @@ class ProfileDaoInstrumentedTest {
         assertNull(stored.safetyProfile)
         assertNull(stored.goal)
         assertNull(stored.latestWeight)
+        assertNull(stored.aiDataAccessPolicy)
     }
 
     @Test
@@ -65,14 +67,16 @@ class ProfileDaoInstrumentedTest {
             profile = profile(now),
             safetyProfile = safety(now),
             goal = goal(now),
-            initialWeight = weight(now)
+            initialWeight = weight(now),
+            aiDataAccessPolicy = aiPolicy(now)
         )
 
         val stored = dao.observeCurrentSetup().first {
             it.profile != null &&
                 it.safetyProfile != null &&
                 it.goal != null &&
-                it.latestWeight != null
+                it.latestWeight != null &&
+                it.aiDataAccessPolicy != null
         }
 
         assertEquals("current-profile", stored.profile?.id)
@@ -82,7 +86,74 @@ class ProfileDaoInstrumentedTest {
         )
         assertEquals("goal-id", stored.goal?.id)
         assertEquals("weight-id", stored.latestWeight?.id)
+        assertEquals(
+            "current-ai-policy",
+            stored.aiDataAccessPolicy?.id
+        )
         assertNotNull(stored.goal?.dailyCalorieTarget)
+    }
+
+    @Test
+    fun revisionSuspendLeRepereDansLaMemeTransaction() = runBlocking {
+        val now = Instant.parse("2026-08-09T10:00:00Z")
+            .toEpochMilli()
+        dao.saveInitialSetup(
+            profile = profile(now),
+            safetyProfile = safety(now),
+            goal = goal(now),
+            initialWeight = weight(now),
+            aiDataAccessPolicy = aiPolicy(now)
+        )
+
+        dao.saveSafetyReview(
+            safetyProfile = safety(now + 1).copy(
+                reducedAppetite = "YES",
+                safetyLevel = "PROFESSIONAL_REVIEW_REQUIRED",
+                assessmentReasons = "REDUCED_APPETITE"
+            ),
+            goal = goal(now + 1).copy(
+                estimatedMaintenanceCalories = null,
+                dailyCalorieTarget = null,
+                initialSurplusCalories = null
+            )
+        )
+
+        val stored = dao.observeCurrentSetup().first {
+            it.safetyProfile?.updatedAtEpochMs == now + 1 &&
+                it.goal?.updatedAtEpochMs == now + 1
+        }
+
+        assertEquals(
+            "PROFESSIONAL_REVIEW_REQUIRED",
+            stored.safetyProfile?.safetyLevel
+        )
+        assertNull(stored.goal?.dailyCalorieTarget)
+    }
+
+    @Test
+    fun suppressionTransactionnelleRetablitUnEtatVide() = runBlocking {
+        val now = Instant.parse("2026-08-09T10:00:00Z")
+            .toEpochMilli()
+        dao.saveInitialSetup(
+            profile = profile(now),
+            safetyProfile = safety(now),
+            goal = goal(now),
+            initialWeight = weight(now),
+            aiDataAccessPolicy = aiPolicy(now)
+        )
+
+        dao.deleteAllUserData()
+
+        val stored = dao.observeCurrentSetup().first {
+            it.profile == null &&
+                it.safetyProfile == null &&
+                it.goal == null &&
+                it.latestWeight == null &&
+                it.aiDataAccessPolicy == null
+        }
+
+        assertNull(stored.profile)
+        assertNull(stored.aiDataAccessPolicy)
     }
 
     private fun profile(now: Long) = UserProfileEntity(
@@ -97,14 +168,25 @@ class ProfileDaoInstrumentedTest {
 
     private fun safety(now: Long) = SafetyProfileEntity(
         id = "current-safety-profile",
-        unintentionalWeightLoss = false,
-        pregnantOrBreastfeeding = false,
-        eatingDisorderHistory = false,
-        significantDigestiveSymptoms = false,
-        relevantMedicalCondition = false,
-        relevantMedication = false,
+        unintentionalWeightLoss = "NO",
+        reducedAppetite = "NO",
+        swallowingDifficultyOrPersistentVomiting = "NO",
+        pregnantOrBreastfeeding = "NO",
+        eatingDisorderHistory = "NO",
+        significantDigestiveSymptoms = "NO",
+        relevantMedicalCondition = "NO",
+        relevantMedication = "NO",
+        foodAllergiesOrIntolerances = "NO",
+        medicalContextNote = null,
         safetyLevel = "NORMAL",
+        assessmentReasons = "",
+        questionnaireVersion = "health-questionnaire-2.0.0",
+        assessmentVersion = "safety-rules-2.0.0",
+        disclaimerVersion = "medical-disclaimer-2.0.0",
+        createdAtEpochMs = now,
         acknowledgedAtEpochMs = now,
+        answeredAtEpochMs = now,
+        reviewDueDate = "2027-02-09",
         updatedAtEpochMs = now
     )
 
@@ -113,7 +195,9 @@ class ProfileDaoInstrumentedTest {
         startWeightKg = 55.0,
         targetWeightKg = 60.0,
         startDate = "2026-08-09",
-        indicativeTargetDate = null,
+        indicativeTargetDate = "2026-12-27",
+        calculationWeightKg = 55.0,
+        calculationDate = "2026-08-09",
         estimatedMaintenanceCalories = 1_747,
         dailyCalorieTarget = 2_050,
         initialSurplusCalories = 300,
@@ -121,7 +205,7 @@ class ProfileDaoInstrumentedTest {
         pace = "PROGRESSIVE",
         initialBmi = 20.2,
         active = true,
-        calculationVersion = "gain-plan-1.0.0",
+        calculationVersion = "gain-plan-2.0.0",
         createdAtEpochMs = now,
         updatedAtEpochMs = now
     )
@@ -134,4 +218,18 @@ class ProfileDaoInstrumentedTest {
         createdAtEpochMs = now,
         updatedAtEpochMs = now
     )
+
+    private fun aiPolicy(now: Long) =
+        AiDataAccessPolicyEntity(
+            id = "current-ai-policy",
+            enabled = false,
+            profileScopeEnabled = false,
+            goalScopeEnabled = false,
+            latestWeightScopeEnabled = false,
+            safetySummaryScopeEnabled = false,
+            consentVersion = null,
+            grantedAtEpochMs = null,
+            revokedAtEpochMs = null,
+            updatedAtEpochMs = now
+        )
 }

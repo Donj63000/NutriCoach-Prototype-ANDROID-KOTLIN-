@@ -3,9 +3,11 @@
 
 package com.`val`.nutrigain.feature.onboarding
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,6 +17,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
@@ -50,13 +53,31 @@ import com.`val`.nutrigain.core.domain.PlanField
 import com.`val`.nutrigain.core.domain.PlanValidationCode
 import com.`val`.nutrigain.core.model.ActivityLevel
 import com.`val`.nutrigain.core.model.GainPace
+import com.`val`.nutrigain.core.model.HealthAnswer
+import com.`val`.nutrigain.core.model.HealthQuestion
 import com.`val`.nutrigain.core.model.MetabolicSex
+import com.`val`.nutrigain.feature.common.planValidationMessage
+import com.`val`.nutrigain.feature.health.HealthQuestionnaireForm
 
 @Composable
 fun OnboardingRoute(
     viewModel: OnboardingViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+    /*
+     * Le bouton Retour Android suit les étapes du formulaire au lieu de
+     * fermer brutalement l'activité. Il reste neutralisé pendant une
+     * écriture afin d'éviter une navigation concurrente.
+     */
+    BackHandler(
+        enabled = state.isSaving ||
+            state.step != OnboardingStep.PROFILE
+    ) {
+        if (!state.isSaving) {
+            viewModel.goToPreviousStep()
+        }
+    }
 
     OnboardingScreen(
         state = state,
@@ -67,17 +88,9 @@ fun OnboardingRoute(
         onMetabolicSexSelected = viewModel::selectMetabolicSex,
         onActivitySelected = viewModel::selectActivityLevel,
         onPaceSelected = viewModel::selectPace,
-        onUnintentionalWeightLossChange =
-            viewModel::setUnintentionalWeightLoss,
-        onPregnantOrBreastfeedingChange =
-            viewModel::setPregnantOrBreastfeeding,
-        onEatingDisorderHistoryChange =
-            viewModel::setEatingDisorderHistory,
-        onDigestiveSymptomsChange =
-            viewModel::setSignificantDigestiveSymptoms,
-        onMedicalConditionChange =
-            viewModel::setRelevantMedicalCondition,
-        onMedicationChange = viewModel::setRelevantMedication,
+        onHealthAnswer = viewModel::updateHealthAnswer,
+        onMedicalContextNoteChange =
+            viewModel::updateMedicalContextNote,
         onAcknowledgementChange =
             viewModel::setSafetyAcknowledged,
         onPrevious = viewModel::goToPreviousStep,
@@ -95,12 +108,8 @@ private fun OnboardingScreen(
     onMetabolicSexSelected: (MetabolicSex) -> Unit,
     onActivitySelected: (ActivityLevel) -> Unit,
     onPaceSelected: (GainPace) -> Unit,
-    onUnintentionalWeightLossChange: (Boolean) -> Unit,
-    onPregnantOrBreastfeedingChange: (Boolean) -> Unit,
-    onEatingDisorderHistoryChange: (Boolean) -> Unit,
-    onDigestiveSymptomsChange: (Boolean) -> Unit,
-    onMedicalConditionChange: (Boolean) -> Unit,
-    onMedicationChange: (Boolean) -> Unit,
+    onHealthAnswer: (HealthQuestion, HealthAnswer) -> Unit,
+    onMedicalContextNoteChange: (String) -> Unit,
     onAcknowledgementChange: (Boolean) -> Unit,
     onPrevious: () -> Unit,
     onNext: () -> Unit
@@ -168,19 +177,15 @@ private fun OnboardingScreen(
                     onPaceSelected = onPaceSelected
                 )
 
-                OnboardingStep.SAFETY -> SafetyStep(
+                OnboardingStep.HEALTH -> HealthStep(
                     state = state,
-                    onUnintentionalWeightLossChange =
-                        onUnintentionalWeightLossChange,
-                    onPregnantOrBreastfeedingChange =
-                        onPregnantOrBreastfeedingChange,
-                    onEatingDisorderHistoryChange =
-                        onEatingDisorderHistoryChange,
-                    onDigestiveSymptomsChange =
-                        onDigestiveSymptomsChange,
-                    onMedicalConditionChange =
-                        onMedicalConditionChange,
-                    onMedicationChange = onMedicationChange,
+                    onHealthAnswer = onHealthAnswer,
+                    onMedicalContextNoteChange =
+                        onMedicalContextNoteChange
+                )
+
+                OnboardingStep.PRIVACY -> PrivacyStep(
+                    state = state,
                     onAcknowledgementChange =
                         onAcknowledgementChange
                 )
@@ -239,7 +244,10 @@ private fun OnboardingScreen(
                 } else {
                     Text(
                         text = stringResource(
-                            if (state.step == OnboardingStep.SAFETY) {
+                            if (
+                                state.step ==
+                                OnboardingStep.PRIVACY
+                            ) {
                                 R.string.onboarding_finish
                             } else {
                                 R.string.onboarding_next
@@ -263,7 +271,7 @@ private fun ProfileStep(
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(
+        contentPadding = PaddingValues(
             horizontal = 24.dp,
             vertical = 24.dp
         ),
@@ -289,6 +297,7 @@ private fun ProfileStep(
                 issue = state.validationIssues[
                     PlanField.BIRTH_DATE
                 ],
+                enabled = !state.isSaving,
                 keyboardType = KeyboardType.Number,
                 imeAction = ImeAction.Next
             )
@@ -301,6 +310,7 @@ private fun ProfileStep(
                 label = stringResource(R.string.height_label),
                 suffix = stringResource(R.string.height_suffix),
                 issue = state.validationIssues[PlanField.HEIGHT],
+                enabled = !state.isSaving,
                 keyboardType = KeyboardType.Decimal,
                 imeAction = ImeAction.Next
             )
@@ -317,6 +327,7 @@ private fun ProfileStep(
                 issue = state.validationIssues[
                     PlanField.CURRENT_WEIGHT
                 ],
+                enabled = !state.isSaving,
                 keyboardType = KeyboardType.Decimal,
                 imeAction = ImeAction.Next
             )
@@ -333,6 +344,7 @@ private fun ProfileStep(
                 issue = state.validationIssues[
                     PlanField.TARGET_WEIGHT
                 ],
+                enabled = !state.isSaving,
                 keyboardType = KeyboardType.Decimal,
                 imeAction = ImeAction.Done
             )
@@ -366,6 +378,7 @@ private fun ProfileStep(
                     description = null,
                     selected =
                         state.metabolicSex == MetabolicSex.FEMALE,
+                    enabled = !state.isSaving,
                     onClick = {
                         onMetabolicSexSelected(
                             MetabolicSex.FEMALE
@@ -379,6 +392,7 @@ private fun ProfileStep(
                     description = null,
                     selected =
                         state.metabolicSex == MetabolicSex.MALE,
+                    enabled = !state.isSaving,
                     onClick = {
                         onMetabolicSexSelected(
                             MetabolicSex.MALE
@@ -386,6 +400,11 @@ private fun ProfileStep(
                     }
                 )
             }
+
+            state.validationIssues[PlanField.METABOLIC_SEX]
+                ?.let { issue ->
+                    SelectionError(issue)
+                }
         }
     }
 }
@@ -398,7 +417,7 @@ private fun LifestyleStep(
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(
+        contentPadding = PaddingValues(
             horizontal = 24.dp,
             vertical = 24.dp
         ),
@@ -432,10 +451,15 @@ private fun LifestyleStep(
                         title = activityTitle(level),
                         description = activityDescription(level),
                         selected = state.activityLevel == level,
+                        enabled = !state.isSaving,
                         onClick = { onActivitySelected(level) }
                     )
                 }
             }
+            state.validationIssues[PlanField.ACTIVITY_LEVEL]
+                ?.let { issue ->
+                    SelectionError(issue)
+                }
         }
 
         item {
@@ -453,32 +477,32 @@ private fun LifestyleStep(
                         title = paceTitle(pace),
                         description = paceDescription(pace),
                         selected = state.pace == pace,
+                        enabled = !state.isSaving,
                         onClick = { onPaceSelected(pace) }
                     )
                 }
             }
+            state.validationIssues[PlanField.GAIN_PACE]
+                ?.let { issue ->
+                    SelectionError(issue)
+                }
         }
     }
 }
 
 @Composable
-private fun SafetyStep(
+private fun HealthStep(
     state: OnboardingUiState,
-    onUnintentionalWeightLossChange: (Boolean) -> Unit,
-    onPregnantOrBreastfeedingChange: (Boolean) -> Unit,
-    onEatingDisorderHistoryChange: (Boolean) -> Unit,
-    onDigestiveSymptomsChange: (Boolean) -> Unit,
-    onMedicalConditionChange: (Boolean) -> Unit,
-    onMedicationChange: (Boolean) -> Unit,
-    onAcknowledgementChange: (Boolean) -> Unit
+    onHealthAnswer: (HealthQuestion, HealthAnswer) -> Unit,
+    onMedicalContextNoteChange: (String) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(
+        contentPadding = PaddingValues(
             horizontal = 24.dp,
             vertical = 24.dp
         ),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
             StepHeader(
@@ -490,80 +514,75 @@ private fun SafetyStep(
         }
 
         item {
-            SafetyNotice()
+            HealthQuestionnaireForm(
+                answers = state.healthAnswers,
+                medicalContextNote = state.medicalContextNote,
+                onAnswer = onHealthAnswer,
+                onMedicalContextNoteChange =
+                    onMedicalContextNoteChange,
+                enabled = !state.isSaving,
+                questionnaireIssue = state.validationIssues[
+                    PlanField.HEALTH_QUESTIONNAIRE
+                ],
+                medicalNoteIssue = state.validationIssues[
+                    PlanField.MEDICAL_CONTEXT_NOTE
+                ]
+            )
         }
+    }
+}
 
+@Composable
+private fun PrivacyStep(
+    state: OnboardingUiState,
+    onAcknowledgementChange: (Boolean) -> Unit
+) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(
+            horizontal = 24.dp,
+            vertical = 24.dp
+        ),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
         item {
-            SafetyCheckbox(
-                checked = state.unintentionalWeightLoss,
-                onCheckedChange =
-                    onUnintentionalWeightLossChange,
-                label = stringResource(
-                    R.string.safety_unintentional_loss
+            StepHeader(
+                title = stringResource(
+                    R.string.privacy_step_title
+                ),
+                description = stringResource(
+                    R.string.privacy_step_description
                 )
             )
         }
 
         item {
-            SafetyCheckbox(
-                checked = state.pregnantOrBreastfeeding,
-                onCheckedChange =
-                    onPregnantOrBreastfeedingChange,
-                label = stringResource(
-                    R.string.safety_pregnancy
+            PrivacyCard(
+                title = stringResource(
+                    R.string.privacy_local_title
+                ),
+                body = stringResource(
+                    R.string.privacy_local_body
                 )
             )
         }
 
         item {
-            SafetyCheckbox(
-                checked = state.eatingDisorderHistory,
-                onCheckedChange =
-                    onEatingDisorderHistoryChange,
-                label = stringResource(
-                    R.string.safety_eating_disorder
+            PrivacyCard(
+                title = stringResource(
+                    R.string.privacy_ai_title
+                ),
+                body = stringResource(
+                    R.string.privacy_ai_body
                 )
             )
         }
 
         item {
-            SafetyCheckbox(
-                checked = state.significantDigestiveSymptoms,
-                onCheckedChange = onDigestiveSymptomsChange,
-                label = stringResource(
-                    R.string.safety_digestive
-                )
-            )
-        }
-
-        item {
-            SafetyCheckbox(
-                checked = state.relevantMedicalCondition,
-                onCheckedChange = onMedicalConditionChange,
-                label = stringResource(
-                    R.string.safety_medical_condition
-                )
-            )
-        }
-
-        item {
-            SafetyCheckbox(
-                checked = state.relevantMedication,
-                onCheckedChange = onMedicationChange,
-                label = stringResource(
-                    R.string.safety_medication
-                )
-            )
-        }
-
-        item {
-            Spacer(modifier = Modifier.height(4.dp))
-            SafetyCheckbox(
+            AcknowledgementRow(
                 checked = state.safetyAcknowledged,
                 onCheckedChange = onAcknowledgementChange,
-                label = stringResource(
-                    R.string.safety_acknowledgement
-                ),
+                enabled = !state.isSaving,
                 isError = state.validationIssues.containsKey(
                     PlanField.SAFETY_ACKNOWLEDGEMENT
                 )
@@ -573,7 +592,7 @@ private fun SafetyStep(
                 PlanField.SAFETY_ACKNOWLEDGEMENT
             ]?.let { issue ->
                 Text(
-                    text = validationMessage(issue),
+                    text = planValidationMessage(issue),
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.padding(
@@ -612,6 +631,7 @@ private fun ValidatedTextField(
     onValueChange: (String) -> Unit,
     label: String,
     issue: PlanValidationCode?,
+    enabled: Boolean,
     keyboardType: KeyboardType,
     imeAction: ImeAction,
     placeholder: String? = null,
@@ -620,6 +640,7 @@ private fun ValidatedTextField(
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
+        enabled = enabled,
         label = { Text(text = label) },
         placeholder = placeholder?.let {
             { Text(text = it) }
@@ -631,7 +652,7 @@ private fun ValidatedTextField(
         isError = issue != null,
         supportingText = issue?.let {
             {
-                Text(text = validationMessage(it))
+                Text(text = planValidationMessage(it))
             }
         },
         keyboardOptions = KeyboardOptions(
@@ -647,6 +668,7 @@ private fun ChoiceRow(
     title: String,
     description: String?,
     selected: Boolean,
+    enabled: Boolean,
     onClick: () -> Unit
 ) {
     val shape = RoundedCornerShape(16.dp)
@@ -656,6 +678,7 @@ private fun ChoiceRow(
             .clip(shape)
             .selectable(
                 selected = selected,
+                enabled = enabled,
                 onClick = onClick,
                 role = Role.RadioButton
             )
@@ -667,7 +690,8 @@ private fun ChoiceRow(
     ) {
         RadioButton(
             selected = selected,
-            onClick = null
+            onClick = null,
+            enabled = enabled
         )
         Column(
             modifier = Modifier
@@ -691,11 +715,11 @@ private fun ChoiceRow(
 }
 
 @Composable
-private fun SafetyCheckbox(
+private fun AcknowledgementRow(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
-    label: String,
-    isError: Boolean = false
+    enabled: Boolean,
+    isError: Boolean
 ) {
     val shape = RoundedCornerShape(16.dp)
     Row(
@@ -704,6 +728,7 @@ private fun SafetyCheckbox(
             .clip(shape)
             .toggleable(
                 value = checked,
+                enabled = enabled,
                 onValueChange = onCheckedChange,
                 role = Role.Checkbox
             )
@@ -715,10 +740,13 @@ private fun SafetyCheckbox(
     ) {
         Checkbox(
             checked = checked,
-            onCheckedChange = null
+            onCheckedChange = null,
+            enabled = enabled
         )
         Text(
-            text = label,
+            text = stringResource(
+                R.string.safety_acknowledgement
+            ),
             style = MaterialTheme.typography.bodyLarge,
             color = if (isError) {
                 MaterialTheme.colorScheme.error
@@ -731,31 +759,35 @@ private fun SafetyCheckbox(
 }
 
 @Composable
-private fun SafetyNotice() {
-    Card(
-        colors = CardDefaults.cardColors(
-            containerColor =
-                MaterialTheme.colorScheme.secondaryContainer
-        )
-    ) {
+private fun PrivacyCard(
+    title: String,
+    body: String
+) {
+    Card(modifier = Modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Text(
-                text = stringResource(
-                    R.string.safety_notice_title
-                ),
+                text = title,
                 style = MaterialTheme.typography.titleMedium
             )
             Text(
-                text = stringResource(
-                    R.string.safety_notice_body
-                ),
+                text = body,
                 style = MaterialTheme.typography.bodyMedium
             )
         }
     }
+}
+
+@Composable
+private fun SelectionError(issue: PlanValidationCode) {
+    Text(
+        text = planValidationMessage(issue),
+        color = MaterialTheme.colorScheme.error,
+        style = MaterialTheme.typography.bodySmall,
+        modifier = Modifier.padding(top = 4.dp)
+    )
 }
 
 @Composable
@@ -850,39 +882,6 @@ private fun paceDescription(
 
             GainPace.SUSTAINED ->
                 R.string.gain_pace_sustained_description
-        }
-    )
-}
-
-@Composable
-private fun validationMessage(
-    code: PlanValidationCode
-): String {
-    return stringResource(
-        when (code) {
-            PlanValidationCode.REQUIRED ->
-                R.string.error_required
-
-            PlanValidationCode.INVALID_BIRTH_DATE ->
-                R.string.error_birth_date_invalid
-
-            PlanValidationCode.ADULT_ONLY ->
-                R.string.error_adult_only
-
-            PlanValidationCode.AGE_OUT_OF_RANGE ->
-                R.string.error_age_out_of_range
-
-            PlanValidationCode.INVALID_HEIGHT ->
-                R.string.error_height_invalid
-
-            PlanValidationCode.INVALID_WEIGHT ->
-                R.string.error_weight_invalid
-
-            PlanValidationCode.TARGET_NOT_HIGHER ->
-                R.string.error_target_not_higher
-
-            PlanValidationCode.ACKNOWLEDGEMENT_REQUIRED ->
-                R.string.error_acknowledgement_required
         }
     )
 }

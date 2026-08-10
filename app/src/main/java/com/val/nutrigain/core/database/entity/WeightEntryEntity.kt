@@ -11,7 +11,12 @@ import androidx.room.PrimaryKey
 @Entity(
     tableName = "weight_entry",
     indices = [
-        Index(value = ["measured_at_epoch_ms"])
+        Index(
+            value = [
+                "measured_at_epoch_ms",
+                "created_at_epoch_ms"
+            ]
+        )
     ]
 )
 data class WeightEntryEntity(

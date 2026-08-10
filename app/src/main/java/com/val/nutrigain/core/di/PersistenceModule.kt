@@ -5,7 +5,10 @@ package com.`val`.nutrigain.core.di
 
 import android.content.Context
 import androidx.room.Room
+import androidx.room.RoomDatabase
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.`val`.nutrigain.core.database.DatabaseKeyManager
+import com.`val`.nutrigain.core.database.MIGRATION_1_2
 import com.`val`.nutrigain.core.database.NutriCoachDatabase
 import com.`val`.nutrigain.core.database.ProfileDao
 import dagger.Module
@@ -41,6 +44,18 @@ object PersistenceModule {
             DATABASE_NAME
         )
             .openHelperFactory(sqlCipherFactory)
+            /*
+             * Toute évolution du schéma contenant des données sensibles doit
+             * disposer d’une migration explicite et non destructive.
+             */
+            .addMigrations(MIGRATION_1_2)
+            /*
+             * SQLite écrase le contenu des cellules supprimées au lieu de les
+             * laisser sur la liste libre. Le fichier reste chiffré par
+             * SQLCipher ; cette option réduit en plus la rémanence logique
+             * après la suppression d'un profil.
+             */
+            .addCallback(DATABASE_SECURITY_CALLBACK)
             .build()
     }
 
@@ -62,6 +77,15 @@ object PersistenceModule {
             java.io.File(databaseFile.path + suffix).exists()
         }
     }
+
+    private val DATABASE_SECURITY_CALLBACK =
+        object : RoomDatabase.Callback() {
+            override fun onOpen(
+                database: SupportSQLiteDatabase
+            ) {
+                database.execSQL("PRAGMA secure_delete = ON")
+            }
+        }
 
     private const val DATABASE_NAME = "nutricoach.db"
     private val DATABASE_FILE_SUFFIXES = listOf(

@@ -5,6 +5,7 @@ package com.`val`.nutrigain.core.database
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import com.`val`.nutrigain.core.database.entity.AiDataAccessPolicyEntity
 import com.`val`.nutrigain.core.database.entity.GoalEntity
 import com.`val`.nutrigain.core.database.entity.SafetyProfileEntity
 import com.`val`.nutrigain.core.database.entity.UserProfileEntity
@@ -15,9 +16,10 @@ import com.`val`.nutrigain.core.database.entity.WeightEntryEntity
         UserProfileEntity::class,
         SafetyProfileEntity::class,
         GoalEntity::class,
-        WeightEntryEntity::class
+        WeightEntryEntity::class,
+        AiDataAccessPolicyEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = true
 )
 abstract class NutriCoachDatabase : RoomDatabase() {

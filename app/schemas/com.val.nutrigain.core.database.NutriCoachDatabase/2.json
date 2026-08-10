@@ -1,0 +1,454 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 2,
+    "identityHash": "6edf914ff9c54a58e9da7b9072a44463",
+    "entities": [
+      {
+        "tableName": "user_profile",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `birth_date` TEXT NOT NULL, `height_cm` REAL NOT NULL, `metabolic_sex` TEXT NOT NULL, `activity_level` TEXT NOT NULL, `created_at_epoch_ms` INTEGER NOT NULL, `updated_at_epoch_ms` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "birthDate",
+            "columnName": "birth_date",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "heightCm",
+            "columnName": "height_cm",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "metabolicSex",
+            "columnName": "metabolic_sex",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "activityLevel",
+            "columnName": "activity_level",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAtEpochMs",
+            "columnName": "created_at_epoch_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAtEpochMs",
+            "columnName": "updated_at_epoch_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "safety_profile",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `unintentional_weight_loss` TEXT NOT NULL, `reduced_appetite` TEXT NOT NULL, `swallowing_difficulty_or_persistent_vomiting` TEXT NOT NULL, `pregnant_or_breastfeeding` TEXT NOT NULL, `eating_disorder_history` TEXT NOT NULL, `significant_digestive_symptoms` TEXT NOT NULL, `relevant_medical_condition` TEXT NOT NULL, `relevant_medication` TEXT NOT NULL, `food_allergies_or_intolerances` TEXT NOT NULL, `medical_context_note` TEXT, `safety_level` TEXT NOT NULL, `assessment_reasons` TEXT NOT NULL, `questionnaire_version` TEXT NOT NULL, `assessment_version` TEXT NOT NULL, `disclaimer_version` TEXT NOT NULL, `created_at_epoch_ms` INTEGER NOT NULL, `acknowledged_at_epoch_ms` INTEGER NOT NULL, `answered_at_epoch_ms` INTEGER NOT NULL, `review_due_date` TEXT NOT NULL, `updated_at_epoch_ms` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "unintentionalWeightLoss",
+            "columnName": "unintentional_weight_loss",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reducedAppetite",
+            "columnName": "reduced_appetite",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "swallowingDifficultyOrPersistentVomiting",
+            "columnName": "swallowing_difficulty_or_persistent_vomiting",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pregnantOrBreastfeeding",
+            "columnName": "pregnant_or_breastfeeding",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "eatingDisorderHistory",
+            "columnName": "eating_disorder_history",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "significantDigestiveSymptoms",
+            "columnName": "significant_digestive_symptoms",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "relevantMedicalCondition",
+            "columnName": "relevant_medical_condition",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "relevantMedication",
+            "columnName": "relevant_medication",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "foodAllergiesOrIntolerances",
+            "columnName": "food_allergies_or_intolerances",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "medicalContextNote",
+            "columnName": "medical_context_note",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "safetyLevel",
+            "columnName": "safety_level",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "assessmentReasons",
+            "columnName": "assessment_reasons",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "questionnaireVersion",
+            "columnName": "questionnaire_version",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "assessmentVersion",
+            "columnName": "assessment_version",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "disclaimerVersion",
+            "columnName": "disclaimer_version",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAtEpochMs",
+            "columnName": "created_at_epoch_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "acknowledgedAtEpochMs",
+            "columnName": "acknowledged_at_epoch_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "answeredAtEpochMs",
+            "columnName": "answered_at_epoch_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reviewDueDate",
+            "columnName": "review_due_date",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAtEpochMs",
+            "columnName": "updated_at_epoch_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "goal",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `start_weight_kg` REAL NOT NULL, `target_weight_kg` REAL NOT NULL, `start_date` TEXT NOT NULL, `indicative_target_date` TEXT, `calculation_weight_kg` REAL NOT NULL, `calculation_date` TEXT NOT NULL, `estimated_maintenance_calories` INTEGER, `daily_calorie_target` INTEGER, `initial_surplus_calories` INTEGER, `target_gain_kg_per_week` REAL NOT NULL, `pace` TEXT NOT NULL, `initial_bmi` REAL NOT NULL, `active` INTEGER NOT NULL, `calculation_version` TEXT NOT NULL, `created_at_epoch_ms` INTEGER NOT NULL, `updated_at_epoch_ms` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startWeightKg",
+            "columnName": "start_weight_kg",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "targetWeightKg",
+            "columnName": "target_weight_kg",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startDate",
+            "columnName": "start_date",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "indicativeTargetDate",
+            "columnName": "indicative_target_date",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "calculationWeightKg",
+            "columnName": "calculation_weight_kg",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "calculationDate",
+            "columnName": "calculation_date",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "estimatedMaintenanceCalories",
+            "columnName": "estimated_maintenance_calories",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "dailyCalorieTarget",
+            "columnName": "daily_calorie_target",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "initialSurplusCalories",
+            "columnName": "initial_surplus_calories",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "targetGainKgPerWeek",
+            "columnName": "target_gain_kg_per_week",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pace",
+            "columnName": "pace",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "initialBmi",
+            "columnName": "initial_bmi",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "active",
+            "columnName": "active",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "calculationVersion",
+            "columnName": "calculation_version",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAtEpochMs",
+            "columnName": "created_at_epoch_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAtEpochMs",
+            "columnName": "updated_at_epoch_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_goal_active_created_at_epoch_ms",
+            "unique": false,
+            "columnNames": [
+              "active",
+              "created_at_epoch_ms"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_goal_active_created_at_epoch_ms` ON `${TABLE_NAME}` (`active`, `created_at_epoch_ms`)"
+          }
+        ]
+      },
+      {
+        "tableName": "weight_entry",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `weight_kg` REAL NOT NULL, `measured_at_epoch_ms` INTEGER NOT NULL, `note` TEXT, `created_at_epoch_ms` INTEGER NOT NULL, `updated_at_epoch_ms` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "weightKg",
+            "columnName": "weight_kg",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "measuredAtEpochMs",
+            "columnName": "measured_at_epoch_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "note",
+            "columnName": "note",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "createdAtEpochMs",
+            "columnName": "created_at_epoch_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAtEpochMs",
+            "columnName": "updated_at_epoch_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_weight_entry_measured_at_epoch_ms_created_at_epoch_ms",
+            "unique": false,
+            "columnNames": [
+              "measured_at_epoch_ms",
+              "created_at_epoch_ms"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_weight_entry_measured_at_epoch_ms_created_at_epoch_ms` ON `${TABLE_NAME}` (`measured_at_epoch_ms`, `created_at_epoch_ms`)"
+          }
+        ]
+      },
+      {
+        "tableName": "ai_data_access_policy",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `enabled` INTEGER NOT NULL, `profile_scope_enabled` INTEGER NOT NULL, `goal_scope_enabled` INTEGER NOT NULL, `latest_weight_scope_enabled` INTEGER NOT NULL, `safety_summary_scope_enabled` INTEGER NOT NULL, `consent_version` TEXT, `granted_at_epoch_ms` INTEGER, `revoked_at_epoch_ms` INTEGER, `updated_at_epoch_ms` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "enabled",
+            "columnName": "enabled",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "profileScopeEnabled",
+            "columnName": "profile_scope_enabled",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "goalScopeEnabled",
+            "columnName": "goal_scope_enabled",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "latestWeightScopeEnabled",
+            "columnName": "latest_weight_scope_enabled",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "safetySummaryScopeEnabled",
+            "columnName": "safety_summary_scope_enabled",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "consentVersion",
+            "columnName": "consent_version",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "grantedAtEpochMs",
+            "columnName": "granted_at_epoch_ms",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "revokedAtEpochMs",
+            "columnName": "revoked_at_epoch_ms",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "updatedAtEpochMs",
+            "columnName": "updated_at_epoch_ms",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6edf914ff9c54a58e9da7b9072a44463')"
+    ]
+  }
+}

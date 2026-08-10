@@ -11,7 +11,9 @@ import androidx.room.PrimaryKey
 @Entity(
     tableName = "goal",
     indices = [
-        Index(value = ["active"])
+        Index(
+            value = ["active", "created_at_epoch_ms"]
+        )
     ]
 )
 data class GoalEntity(
@@ -25,6 +27,10 @@ data class GoalEntity(
     val startDate: String,
     @ColumnInfo(name = "indicative_target_date")
     val indicativeTargetDate: String?,
+    @ColumnInfo(name = "calculation_weight_kg")
+    val calculationWeightKg: Double,
+    @ColumnInfo(name = "calculation_date")
+    val calculationDate: String,
     @ColumnInfo(name = "estimated_maintenance_calories")
     val estimatedMaintenanceCalories: Int?,
     @ColumnInfo(name = "daily_calorie_target")
